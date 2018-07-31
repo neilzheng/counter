@@ -21,8 +21,7 @@ module cntclk
     wire [WIDTH-1:0] counter_value;
     wire counter_rstn;
     wire counter_restart;
-    reg [1:0] counter_setup;
-    reg [WIDTH-1:0] counter_loader;
+    wire [1:0] counter_setup;
     wire inner_rst_n;
 
     counter #(.WIDTH(WIDTH)) inner_counter (
@@ -38,24 +37,13 @@ module cntclk
 
     assign counter_restart = 1'b0;
 
-    assign io_value = (i_load || (counter_setup != 2'b00)) ? { WIDTH{1'bz} } : counter_value;
+    assign io_value = (!inner_rst_n) ? { WIDTH{1'bz} } : counter_value;
 
-    assign counter_value = (counter_setup != 2'b00) ? counter_loader : { WIDTH{1'bz} };
+    assign counter_value = (!i_rst_n) ? { WIDTH{1'b1} } : i_load ? io_value : { WIDTH{1'bz} };
 
-    assign inner_rst_n = (counter_setup == 2'b00) ? 1'b1 : 1'b0;
+    assign inner_rst_n = (~i_rst_n | i_load) ? 1'b0 : 1'b1;
 
-    always @(posedge i_clk, negedge i_rst_n) begin
-        if (!i_rst_n) begin
-            counter_setup <= #1 2'b11;
-            counter_loader <= #1 { WIDTH{1'b1} };
-        end else if (i_load) begin
-            counter_loader <= #1 io_value;
-            counter_setup <= #1 2'b11;
-        end else begin
-            counter_loader <= #1 { WIDTH{1'b0} };
-            counter_setup <= #1 2'b00;
-        end
-    end
+    assign counter_setup = (!inner_rst_n) ? 2'b11 : 2'b00;
 
     always @(posedge o_zero, negedge inner_rst_n) begin
         if (!inner_rst_n) begin

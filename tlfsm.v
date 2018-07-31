@@ -37,42 +37,59 @@ module tlfsm
     assign counter_rst_n = 1'b1;
 
     reg [2:0] state;
+    reg [2:0] next_state;
 
     assign o_state = state;
 
     always @(posedge i_clk, negedge i_rst_n) begin
         if (!i_rst_n) begin
             state <= #1 `START;
-            counter_loader <= #1 Y_TIME;
-            loade <= #1 1'b1;
         end else begin
-            counter_loader <= #1 { T_WIDTH{1'b0} };
-            loade <= #1 1'b0;
-            case (state)
-                `START: if (evt_trigger) begin
-                    state <= #1 `NS;
-                    counter_loader <= #1 NS_TIME;
-                    loade <= #1 1'b1;
+            state <= #1 next_state;
+        end
+    end
+
+    always @* begin
+        if (!i_rst_n) begin
+            next_state = #1 `START;
+            counter_loader = #1 Y_TIME;
+            loade = #1 1'b1;
+        end else begin
+            casez ({evt_trigger, state})
+                {1'b1, `START}: begin
+                    next_state = #1 `NS;
+                    counter_loader = #1 NS_TIME;
+                    loade = #1 1'b1;
                 end
-                `NS: if (evt_trigger) begin
-                    state <= #1 `NY;
-                    counter_loader <= #1 Y_TIME;
-                    loade <= #1 1'b1;
+                {1'b1, `NS}: begin
+                    next_state = #1 `NY;
+                    counter_loader = #1 Y_TIME;
+                    loade = #1 1'b1;
                 end
-                `NY: if (evt_trigger) begin
-                    state <= #1 `EW;
-                    counter_loader <= #1 EW_TIME;
-                    loade <= #1 1'b1;
+                {1'b1, `NY}: begin
+                    next_state = #1 `EW;
+                    counter_loader = #1 EW_TIME;
+                    loade = #1 1'b1;
                 end
-                `EW: if (evt_trigger) begin
-                    state <= #1 `EY;
-                    counter_loader <= #1 Y_TIME;
-                    loade <= #1 1'b1;
+                {1'b1, `EW}: begin
+                    next_state = #1 `EY;
+                    counter_loader = #1 Y_TIME;
+                    loade = #1 1'b1;
                 end
-                `EY: if (evt_trigger) begin
-                    state <= #1 `NS;
-                    counter_loader <= #1 NS_TIME;
-                    loade <= #1 1'b1;
+                {1'b1, `EY}: begin
+                    next_state = #1 `NS;
+                    counter_loader = #1 NS_TIME;
+                    loade = #1 1'b1;
+                end
+                {1'b1, 3'b???}: begin
+                    next_state = #1 `START;
+                    counter_loader = #1 Y_TIME;
+                    loade = #1 1'b1;
+                end
+                {1'b0, 3'b???}: begin
+                    next_state = #1 state;
+                    counter_loader = #1 { T_WIDTH{1'b0} };
+                    loade = #1 1'b0;
                 end
             endcase
         end
