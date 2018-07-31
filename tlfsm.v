@@ -23,6 +23,7 @@ module tlfsm
     reg [T_WIDTH-1:0] counter_loader;
     wire counter_rst_n;
     reg loade;
+    reg init;
 
     cntclk #(.WIDTH(T_WIDTH)) inner_counter(
         .o_clk(),
@@ -44,13 +45,15 @@ module tlfsm
     always @(posedge i_clk, negedge i_rst_n) begin
         if (!i_rst_n) begin
             state <= #1 `START;
+            init <= #1 1'b1;
         end else begin
             state <= #1 next_state;
+            init <= #1 1'b0;
         end
     end
 
     always @* begin
-        if (!i_rst_n) begin
+        if (init) begin
             next_state = #1 `START;
             counter_loader = #1 Y_TIME;
             loade = #1 1'b1;
