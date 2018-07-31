@@ -29,9 +29,7 @@ module trafficlight (
         .i_rst_n(i_rst_n)
     );
 
-    // 9s, 6s, 3s
-    // signals have a 3 clock cycle delay
-    tlfsm #(.T_WIDTH(12), .NS_TIME(12'd87), .EW_TIME(12'd57), .Y_TIME(12'd27)) the_fsm(
+    tlfsm #(.T_WIDTH(12), .NS_TIME(12'd90), .EW_TIME(12'd60), .Y_TIME(12'd30)) the_fsm(
         .o_state(state),
         .i_clk(slowclk),
         .i_rst_n(i_rst_n)
