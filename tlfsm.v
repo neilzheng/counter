@@ -58,43 +58,44 @@ module tlfsm
             counter_loader = #1 Y_TIME;
             loade = #1 1'b1;
         end else begin
-            casez ({evt_trigger, state})
-                {1'b1, `START}: begin
-                    next_state = #1 `NS;
-                    counter_loader = #1 NS_TIME;
-                    loade = #1 1'b1;
-                end
-                {1'b1, `NS}: begin
-                    next_state = #1 `NY;
-                    counter_loader = #1 Y_TIME;
-                    loade = #1 1'b1;
-                end
-                {1'b1, `NY}: begin
-                    next_state = #1 `EW;
-                    counter_loader = #1 EW_TIME;
-                    loade = #1 1'b1;
-                end
-                {1'b1, `EW}: begin
-                    next_state = #1 `EY;
-                    counter_loader = #1 Y_TIME;
-                    loade = #1 1'b1;
-                end
-                {1'b1, `EY}: begin
-                    next_state = #1 `NS;
-                    counter_loader = #1 NS_TIME;
-                    loade = #1 1'b1;
-                end
-                {1'b1, 3'b???}: begin
-                    next_state = #1 `START;
-                    counter_loader = #1 Y_TIME;
-                    loade = #1 1'b1;
-                end
-                {1'b0, 3'b???}: begin
-                    next_state = #1 state;
-                    counter_loader = #1 { T_WIDTH{1'b0} };
-                    loade = #1 1'b0;
-                end
-            endcase
+            if (evt_trigger) begin
+                casez (state)
+                    `START: begin
+                        next_state = #1 `NS;
+                        counter_loader = #1 NS_TIME;
+                        loade = #1 1'b1;
+                    end
+                    `NS: begin
+                        next_state = #1 `NY;
+                        counter_loader = #1 Y_TIME;
+                        loade = #1 1'b1;
+                    end
+                    `NY: begin
+                        next_state = #1 `EW;
+                        counter_loader = #1 EW_TIME;
+                        loade = #1 1'b1;
+                    end
+                    `EW: begin
+                        next_state = #1 `EY;
+                        counter_loader = #1 Y_TIME;
+                        loade = #1 1'b1;
+                    end
+                    `EY: begin
+                        next_state = #1 `NS;
+                        counter_loader = #1 NS_TIME;
+                        loade = #1 1'b1;
+                    end
+                    3'b???: begin
+                        next_state = #1 `START;
+                        counter_loader = #1 Y_TIME;
+                        loade = #1 1'b1;
+                    end
+                endcase
+            end else begin
+                next_state = #1 state;
+                counter_loader = #1 { T_WIDTH{1'b0} };
+                loade = #1 1'b0;
+            end
         end
     end
 
