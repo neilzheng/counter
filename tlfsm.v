@@ -85,7 +85,7 @@ module tlfsm
                         counter_loader = #1 NS_TIME;
                         loade = #1 1'b1;
                     end
-                    3'b???: begin
+                    default: begin
                         next_state = #1 `START;
                         counter_loader = #1 Y_TIME;
                         loade = #1 1'b1;
